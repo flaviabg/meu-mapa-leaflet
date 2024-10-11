@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Mapa de Jogadores</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+  <style>
+    #map { height: 100vh; width: 100%; }
+  </style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<script>
+  // Inicializa o mapa
+  var map = L.map('map').setView([0, 0], 15);
+
+  // Carregar as tiles do mapa (camadas base)
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19
+  }).addTo(map);
+
+  // Função para atualizar a posição do jogador
+  function atualizarPosicaoJogador(posicao) {
+    var lat = posicao.coords.latitude;
+    var lon = posicao.coords.longitude;
+    map.setView([lat, lon], 15); // Foca o mapa na localização atual
+    L.marker([lat, lon]).addTo(map).bindPopup('Você está aqui!').openPopup();
+  }
+
+  // Verifica a posição em tempo real
+  if (navigator.geolocation) {
+    navigator.geolocation.watchPosition(atualizarPosicaoJogador);
+  } else {
+    alert("Geolocalização não suportada pelo navegador.");
+  }
+</script>
+
+</body>
+</html>
