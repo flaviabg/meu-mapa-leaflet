@@ -4,39 +4,31 @@
   <title>Mapa de Jogadores</title>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Link para o Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+  
+  <!-- Estilo para o mapa -->
   <style>
-    #map { height: 100vh; width: 100%; }
+    #map {
+      height: 100vh; /* 100% da altura da tela do navegador */
+      width: 100%;   /* 100% da largura da página */
+    }
   </style>
 </head>
 <body>
 
+<!-- Div que contém o mapa -->
 <div id="map"></div>
 
+<!-- Script do Leaflet -->
+<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+
+<!-- Script para inicializar o mapa -->
 <script>
-  // Inicializa o mapa
-  var map = L.map('map').setView([0, 0], 15);
+  // Inicializa o mapa com um ponto de vista padrão
+  var map = L.map('map').setView([0, 0
 
-  // Carregar as tiles do mapa (camadas base)
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19
-  }).addTo(map);
-
-  // Função para atualizar a posição do jogador
-  function atualizarPosicaoJogador(posicao) {
-    var lat = posicao.coords.latitude;
-    var lon = posicao.coords.longitude;
-    map.setView([lat, lon], 15); // Foca o mapa na localização atual
-    L.marker([lat, lon]).addTo(map).bindPopup('Você está aqui!').openPopup();
-  }
-
-  // Verifica a posição em tempo real
-  if (navigator.geolocation) {
-    navigator.geolocation.watchPosition(atualizarPosicaoJogador);
-  } else {
-    alert("Geolocalização não suportada pelo navegador.");
-  }
 </script>
 
 </body>
