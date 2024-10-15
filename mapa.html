@@ -15,28 +15,55 @@
 <div id="map"></div>
 
 <script>
-  // Inicializa o mapa
+  // Inicializa o mapa com uma posição neutra
   var map = L.map('map').setView([0, 0], 15);
 
-  // Carregar as tiles do mapa (camadas base)
+  // Carregar as tiles do mapa (OpenStreetMap)
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19
   }).addTo(map);
+
+  // Variável para armazenar o marcador do jogador (para evitar criar múltiplos marcadores)
+  var playerMarker = null;
 
   // Função para atualizar a posição do jogador
   function atualizarPosicaoJogador(posicao) {
     var lat = posicao.coords.latitude;
     var lon = posicao.coords.longitude;
-    map.setView([lat, lon], 15); // Foca o mapa na localização atual
-    L.marker([lat, lon]).addTo(map).bindPopup('Você está aqui!').openPopup();
+
+    // Centraliza o mapa na nova localização
+    map.setView([lat, lon], 15);
+
+    // Se o marcador já existir, apenas atualize sua posição
+    if (playerMarker) {
+      playerMarker.setLatLng([lat, lon]);
+    } else {
+      // Cria um novo marcador para a primeira vez
+      playerMarker = L.marker([lat, lon]).addTo(map).bindPopup('Você está aqui!');
+    }
+
+    // Abre o popup do marcador
+    playerMarker.openPopup();
   }
 
-  // Verifica a posição em tempo real
+  // Verifica se o navegador suporta geolocalização
   if (navigator.geolocation) {
-    navigator.geolocation.watchPosition(atualizarPosicaoJogador);
+    // Usa watchPosition para obter atualizações contínuas de posição
+    navigator.geolocation.watchPosition(atualizarPosicaoJogador, function(error) {
+      console.error("Erro ao obter geolocalização: ", error.message);
+    }, {
+      enableHighAccuracy: true,  // Melhorar a precisão
+      timeout: 5000,  // Tempo máximo para obter a posição
+      maximumAge: 0   // Não usar uma posição em cache
+    });
   } else {
-    alert("Geolocalização não suportada pelo navegador.");
+    alert("Geolocalização não é suportada pelo navegador.");
   }
+</script>
+
+</body>
+</html>
+
 </script>
 
 </body>
