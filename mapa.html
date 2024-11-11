@@ -8,24 +8,8 @@
 <body>
   <div id="map" style="height: 100vh; width: 100%;"></div>
   <script>
-    // Função para obter latitude e longitude do hash da URL
-    function getCoordinatesFromURL() {
-      // Captura o hash da URL (ex: #LATITUDE,LONGITUDE)
-      const hash = window.location.hash.substring(1);  // Remove o '#'
-      const [lat, lng] = hash.split(",").map(Number);  // Divide e converte para número
-      if (!isNaN(lat) && !isNaN(lng)) {
-        return { lat, lng };
-      } else {
-        // Coordenadas padrão (caso não haja coordenadas válidas na URL)
-        return { lat: 0, lng: 0 };
-      }
-    }
-
-    // Obtem as coordenadas
-    const coords = getCoordinatesFromURL();
-
-    // Inicializa o mapa no elemento "map" com as coordenadas
-    const map = L.map('map').setView([coords.lat, coords.lng], 15);  // Zoom 15 para uma visão aproximada
+    // Inicializa o mapa com uma posição padrão
+    const map = L.map('map').setView([0, 0], 15);
 
     // Adiciona o tile layer (camada do mapa)
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -33,10 +17,29 @@
       attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
-    // Adiciona um marcador na posição do jogador
-    L.marker([coords.lat, coords.lng]).addTo(map)
-      .bindPopup('Você está aqui!')
-      .openPopup();
+    // Cria um marcador vazio que será movido conforme a localização do jogador
+    const marker = L.marker([0, 0]).addTo(map).bindPopup('Você está aqui!').openPopup();
+
+    // Função para atualizar a localização do mapa
+    function updateMapLocation() {
+      const hash = window.location.hash.substring(1);  // Remove o '#'
+      const [lat, lng] = hash.split(",").map(Number);  // Divide e converte para número
+
+      // Verifica se as coordenadas são válidas
+      if (!isNaN(lat) && !isNaN(lng)) {
+        // Centraliza o mapa e atualiza o marcador
+        map.setView([lat, lng], 15);  // Ajusta o nível de zoom se necessário
+        marker.setLatLng([lat, lng]);
+      } else {
+        console.error("Coordenadas inválidas:", lat, lng);
+      }
+    }
+
+    // Atualiza o mapa na inicialização
+    updateMapLocation();
+
+    // Atualiza o mapa sempre que o hash da URL mudar
+    window.addEventListener("hashchange", updateMapLocation);
   </script>
 </body>
 </html>
