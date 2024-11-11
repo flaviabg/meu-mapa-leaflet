@@ -1,71 +1,79 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Mapa de Jogadores</title>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
-  <style>
-    #map { height: 100vh; width: 100%; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Mapa com Leaflet</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+        }
+        html, body, #map {
+            height: 100%;
+            width: 100vw;
+        }
+        .popup-content {
+            display: flex;
+            flex-direction: column;
+        }
+        .popup-content textarea {
+            margin-top: 5px;
+            resize: none;
+            width: 100%;
+            height: 50px;
+        }
+        .popup-content button {
+            margin-top: 5px;
+            padding: 5px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
+    <div id="map"></div>
 
-<div id="map"></div>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script>
+        // Inicializa o mapa nas coordenadas fornecidas
+        var map = L.map('map').setView([-20.734859, -40.544509], 16);
 
-<script>
-  // Inicializa o mapa com uma posição neutra
-  var map = L.map('map').setView([0, 0], 15);
+        // Adiciona o tile layer do OpenStreetMap
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
 
-  // Carregar as tiles do mapa (OpenStreetMap)
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19
-  }).addTo(map);
+        // Função para tratar erro de localização
+        function onLocationError(e) {
+            alert(e.message);
+        }
 
-  // Variável para armazenar o marcador do jogador (para evitar criar múltiplos marcadores)
-  var playerMarker = null;
+        map.on('locationerror', onLocationError);
 
-  // Função para atualizar a posição do jogador
-  function atualizarPosicaoJogador(posicao) {
-    var lat = posicao.coords.latitude;
-    var lon = posicao.coords.longitude;
+        // Adiciona um ponto no mapa ao clicar
+        map.on('click', function(e) {
+            // Conteúdo do popup com campo de texto e botão
+            var popupContent = `
+                <div class="popup-content">
+                    <label>Seu Texto:</label>
+                    <textarea id="user-text" placeholder="Digite seu texto aqui..."></textarea>
+                    <button onclick="submitText()">Enviar</button>
+                </div>
+            `;
 
-    // Centraliza o mapa na nova localização
-    map.setView([lat, lon], 15);
+            // Adiciona o marcador e o popup no local clicado
+            L.marker(e.latlng).addTo(map)
+                .bindPopup(popupContent)
+                .openPopup();
+        });
 
-    // Se o marcador já existir, apenas atualize sua posição
-    if (playerMarker) {
-      playerMarker.setLatLng([lat, lon]);
-    } else {
-      // Cria um novo marcador para a primeira vez
-      playerMarker = L.marker([lat, lon]).addTo(map).bindPopup('Você está aqui!');
-    }
-
-    // Abre o popup do marcador
-    playerMarker.openPopup();
-  }
-
-  // Verifica se o navegador suporta geolocalização
-  if (navigator.geolocation) {
-    // Usa watchPosition para obter atualizações contínuas de posição
-    navigator.geolocation.watchPosition(atualizarPosicaoJogador, function(error) {
-      console.error("Erro ao obter geolocalização: ", error.message);
-    }, {
-      enableHighAccuracy: true,  // Melhorar a precisão
-      timeout: 5000,  // Tempo máximo para obter a posição
-      maximumAge: 0   // Não usar uma posição em cache
-    });
-  } else {
-    alert("Geolocalização não é suportada pelo navegador.");
-  }
-</script>
-
+        // Função para capturar e exibir o texto do usuário
+        function submitText() {
+            var userText = document.getElementById("user-text").value;
+            alert("Texto enviado: " + userText);
+        }
+    </script>
 </body>
 </html>
-
-</script>
-
-</body>
-</html>
-
