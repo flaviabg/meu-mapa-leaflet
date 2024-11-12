@@ -30,7 +30,7 @@
       // Verifica se as coordenadas são válidas
       if (!isNaN(lat) && !isNaN(lng)) {
         // Atualiza a posição do mapa e do marcador
-        map.setView([lat, lng], 15);  // Ajusta o nível de zoom se necessário
+        map.setView([lat, lng], 18);  // Ajusta o nível de zoom se necessário
         marker.setLatLng([lat, lng]);
       } else {
         console.error("Coordenadas inválidas na URL:", lat, lng);
