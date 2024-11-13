@@ -1,14 +1,34 @@
-
-
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
-  <title>Mapa do Jogo</title>
+  <title>Mapa do Jogo com Firebase</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+  
+  <script>
+    // Configuração do Firebase - substitua pelos valores do seu projeto no Firebase Console
+    const firebaseConfig = {
+      apiKey: "SUA_API_KEY",
+      authDomain: "SEU_AUTH_DOMAIN",
+      projectId: "SEU_PROJECT_ID",
+      storageBucket: "SEU_STORAGE_BUCKET",
+      messagingSenderId: "SEU_MESSAGING_SENDER_ID",
+      appId: "SEU_APP_ID",
+      databaseURL: "SUA_DATABASE_URL"  // Somente se estiver usando o Realtime Database
+    };
+
+    // Inicializa o Firebase
+    firebase.initializeApp(firebaseConfig);
+  </script>
 </head>
 <body>
   <div id="map" style="height: 100vh; width: 100%;"></div>
+  
   <script>
     // Inicializa o mapa com uma posição padrão (será atualizada)
     const map = L.map('map').setView([0, 0], 16);
@@ -30,7 +50,7 @@
       // Verifica se as coordenadas são válidas
       if (!isNaN(lat) && !isNaN(lng)) {
         // Atualiza a posição do mapa e do marcador
-        map.setView([lat, lng], 16);  // Ajusta o nível de zoom se necessário
+        map.setView([lat, lng], 16);  // Ajusta o nível de zoom, se necessário
         marker.setLatLng([lat, lng]);
       } else {
         console.error("Coordenadas inválidas na URL:", lat, lng);
@@ -42,6 +62,35 @@
 
     // Atualiza o mapa sempre que o hash da URL mudar
     window.addEventListener("hashchange", updateMapLocation);
+
+    // Exemplo de função para gravar áudio e salvar no Firebase
+    function saveAudioToFirebase(audioBlob, latitude, longitude) {
+      // Cria uma referência de armazenamento para o áudio no Firebase Storage
+      var storageRef = firebase.storage().ref('audios/' + Date.now() + '.ogg');
+      
+      // Carrega o áudio no Firebase Storage
+      storageRef.put(audioBlob).then(function(snapshot) {
+          return snapshot.ref.getDownloadURL();  // Obtém o URL de download do áudio
+      }).then(function(audioUrl) {
+          // Salva os dados no Firebase Database
+          var dbRef = firebase.database().ref('recordings').push();
+          dbRef.set({
+              audioUrl: audioUrl,         // URL de download do áudio
+              latitude: latitude,         // Latitude da localização
+              longitude: longitude,       // Longitude da localização
+              timestamp: new Date().toISOString()
+          }).then(function() {
+              console.log("Áudio e localização salvos no Firebase.");
+              alert("Áudio e localização salvos!");
+          }).catch(function(error) {
+              console.error("Erro ao salvar no Firebase Database:", error);
+          });
+      }).catch(function(error) {
+          console.error("Erro ao carregar o áudio no Firebase Storage:", error);
+          alert("Erro ao carregar o áudio no Storage.");
+      });
+    }
   </script>
 </body>
 </html>
+
