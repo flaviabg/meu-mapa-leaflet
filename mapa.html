@@ -105,7 +105,9 @@
     }
 
     // Receber mensagens do Construct 3 para iniciar e parar a gravação
-    window.addEventListener("message", function(event) {
+    window.addEventListener("message", function(event) { 
+      console.log("Mensagem recebida do Construct 3:", event.data);  // Log para verificar a mensagem
+      
       if (event.data === "startRecording") {
           startRecording();
       } else if (event.data === "stopRecording") {
