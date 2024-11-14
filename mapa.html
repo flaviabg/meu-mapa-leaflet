@@ -1,19 +1,7 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Mapa do Jogo com Firebase</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-  
-  <!-- Firebase SDKs -->
- <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
- <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js"></script>
- <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
-  
-  
-  <script>
-    // Configuração do Firebase
-    const firebaseConfig = {
+ <script>
+ src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+ <script>
+   const firebaseConfig = {
       apiKey: "AIzaSyCHi6ROdLPOSs_V6GFm-n08A2NWZHxClMs",
       authDomain: "ceus-9fe17.firebaseapp.com",
       projectId: "ceus-9fe17",
@@ -23,135 +11,8 @@
       databaseURL: "https://ceus-9fe17-default-rtdb.firebaseio.com"
     };
 
-    // Inicializa o Firebase
-    firebase.initializeApp(firebaseConfig);
+firebase.initializeApp(firebaseConfig);
     console.log("Firebae inicializado");
-    console.log("Versão do Firebase", firebase.SDK_VERSION);
+ </script>
     
-      
-    // Receber mensagens do Construct 3 para iniciar e parar a gravação
-    window.addEventListener("message", function(event) { 
-      console.log("Mensagem recebida do Construct 3:", event.data);  // Log para verificar a mensagem
-      
-      if (event.data === "startRecording") {
-          startRecording();
-      } else if (event.data === "stopRecording") {
-          stopRecording();
-      }
-    });
-
-    // Função para iniciar a gravação
-    function startRecording() {
-      console.log("Tentando iniciar gravação");
-
-      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-          navigator.mediaDevices.getUserMedia({ audio: true })
-              .then(function(stream) {
-                  console.log("Microfone acessado com sucesso");
-
-                  window.mediaRecorder = new MediaRecorder(stream);
-                  window.audioChunks = [];  // Armazena os dados de áudio
-
-                  window.mediaRecorder.ondataavailable = function(event) {
-                      window.audioChunks.push(event.data);
-                      console.log("Dados de áudio capturados:", event.data);
-                  };
-
-                  window.mediaRecorder.start();
-                  console.log("Gravação iniciada com sucesso");
-              })
-              .catch(function(err) {
-                  console.error("Erro ao acessar o microfone:", err);
-                  alert("Erro ao acessar o microfone. Verifique as permissões.");
-              });
-      } else {
-          console.error("Navegador não suporta getUserMedia API");
-          alert("Seu dispositivo não suporta captura de áudio.");
-      }
-    }
-
-    // Função para parar a gravação, capturar a localização e salvar no Firebase
-    function stopRecording() {
-      if (window.mediaRecorder && window.mediaRecorder.state === "recording") {
-          window.mediaRecorder.stop();
-          console.log("Gravação interrompida");
-
-          window.mediaRecorder.onstop = function() {
-              const audioBlob = new Blob(window.audioChunks, { type: 'audio/ogg; codecs=opus' });
-              window.audioChunks = [];  // Limpa os dados de áudio
-
-              navigator.geolocation.getCurrentPosition(function(position) {
-                  const latitude = position.coords.latitude;
-                  const longitude = position.coords.longitude;
-                  saveAudioToFirebase(audioBlob, latitude, longitude);
-              }, function(error) {
-                  console.error("Erro ao capturar localização:", error);
-                  alert("Erro ao capturar localização. Verifique as permissões.");
-              });
-          };
-      } else {
-          console.error("Nenhuma gravação em andamento.");
-          alert("Nenhuma gravação em andamento.");
-      }
-    }
-
-    // Função para salvar o áudio e localização no Firebase
-    function saveAudioToFirebase(audioBlob, latitude, longitude) {
-      const storageRef = firebase.storage().ref('audios/' + Date.now() + '.ogg');
-
-      storageRef.put(audioBlob).then(snapshot => snapshot.ref.getDownloadURL())
-          .then(audioUrl => {
-              const dbRef = firebase.database().ref('recordings').push();
-              return dbRef.set({
-                  audioUrl: audioUrl,
-                  latitude: latitude,
-                  longitude: longitude,
-                  timestamp: new Date().toISOString()
-              });
-          })
-          .then(() => {
-              console.log("Áudio e localização salvos no Firebase.");
-              alert("Áudio e localização salvos com sucesso!");
-          })
-          .catch(error => {
-              console.error("Erro ao salvar no Firebase:", error);
-              alert("Erro ao salvar dados no Firebase.");
-          });
-    }
-  </script>
-</head>
-<body>
-  <div id="map" style="height: 100vh; width: 100%;"></div>
   
-  <script>
-    // Inicializa o mapa com uma posição padrão
-    const map = L.map('map').setView([0, 0], 16);
-
-    // Adiciona o tile layer do mapa
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '© OpenStreetMap contributors'
-    }).addTo(map);
-
-    // Cria um marcador vazio (posição será atualizada)
-    const marker = L.marker([0, 0]).addTo(map).bindPopup('Você está aqui!');
-
-    // Função para atualizar a posição do mapa com base no hash da URL
-    function updateMapLocation() {
-      const hash = window.location.hash.substring(1); 
-      const [lat, lng] = hash.split(",").map(Number);
-
-      if (!isNaN(lat) && !isNaN(lng)) {
-        map.setView([lat, lng], 16);  
-        marker.setLatLng([lat, lng]);
-      } else {
-        console.error("Coordenadas inválidas na URL:", lat, lng);
-      }
-    }
-
-    // Atualiza o mapa ao carregar a página e ao mudar o hash da URL
-    updateMapLocation();
-    window.addEventListener("hashchange", updateMapLocation);
-  </script>
-</body>
-</html>
