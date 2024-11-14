@@ -25,6 +25,17 @@
     // Inicializa o Firebase
     firebase.initializeApp(firebaseConfig);
 
+    // Receber mensagens do Construct 3 para iniciar e parar a gravação
+    window.addEventListener("message", function(event) { 
+      console.log("Mensagem recebida do Construct 3:", event.data);  // Log para verificar a mensagem
+      
+      if (event.data === "startRecording") {
+          startRecording();
+      } else if (event.data === "stopRecording") {
+          stopRecording();
+      }
+    });
+
     // Função para iniciar a gravação
     function startRecording() {
       console.log("Tentando iniciar gravação");
@@ -103,17 +114,6 @@
               alert("Erro ao salvar dados no Firebase.");
           });
     }
-
-    // Receber mensagens do Construct 3 para iniciar e parar a gravação
-    window.addEventListener("message", function(event) { 
-      console.log("Mensagem recebida do Construct 3:", event.data);  // Log para verificar a mensagem
-      
-      if (event.data === "startRecording") {
-          startRecording();
-      } else if (event.data === "stopRecording") {
-          stopRecording();
-      }
-    });
   </script>
 </head>
 <body>
@@ -151,5 +151,3 @@
   </script>
 </body>
 </html>
-
-
