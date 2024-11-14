@@ -26,6 +26,8 @@
     // Inicializa o Firebase
     firebase.initializeApp(firebaseConfig);
     console.log("Firebae inicializado");
+    console.log("Versão do Firebase", firebase.SDK_VERSION);
+    
       
     // Receber mensagens do Construct 3 para iniciar e parar a gravação
     window.addEventListener("message", function(event) { 
