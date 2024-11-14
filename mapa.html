@@ -1,1 +1,46 @@
 
+  <!DOCTYPE html>
+<html>
+<head>
+  <title>Mapa do Jogo</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+</head>
+<body>
+  <div id="map" style="height: 100vh; width: 100%;"></div>
+  <script>
+    // Inicializa o mapa com uma posição padrão (será atualizada)
+    const map = L.map('map').setView([0, 0], 16);
+
+    // Adiciona o tile layer (camada do mapa)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Cria um marcador vazio (posição será atualizada)
+    const marker = L.marker([0, 0]).addTo(map).bindPopup('Você está aqui!');
+
+    // Função para obter coordenadas do hash da URL e atualizar o mapa
+    function updateMapLocation() {
+      const hash = window.location.hash.substring(1);  // Remove o '#'
+      const [lat, lng] = hash.split(",").map(Number);  // Divide e converte para número
+
+      // Verifica se as coordenadas são válidas
+      if (!isNaN(lat) && !isNaN(lng)) {
+        // Atualiza a posição do mapa e do marcador
+        map.setView([lat, lng], 16);  // Ajusta o nível de zoom se necessário
+        marker.setLatLng([lat, lng]);
+      } else {
+        console.error("Coordenadas inválidas na URL:", lat, lng);
+      }
+    }
+
+    // Chama a função de atualização ao carregar a página
+    updateMapLocation();
+
+    // Atualiza o mapa sempre que o hash da URL mudar
+    window.addEventListener("hashchange", updateMapLocation);
+  </script>
+</body>
+</html>
